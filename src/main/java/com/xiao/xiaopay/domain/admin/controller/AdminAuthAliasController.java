@@ -1,9 +1,11 @@
 package com.xiao.xiaopay.domain.admin.controller;
 
 import com.xiao.xiaopay.common.api.ApiResponse;
+import com.xiao.xiaopay.common.web.ClientIpResolver;
 import com.xiao.xiaopay.domain.admin.dto.AdminLoginRequest;
 import com.xiao.xiaopay.domain.admin.dto.AdminLoginResponse;
 import com.xiao.xiaopay.domain.admin.service.AdminAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +25,9 @@ public class AdminAuthAliasController {
     private final AdminAuthService adminAuthService;
 
     @PostMapping("/login")
-    public ApiResponse<AdminLoginResponse> login(@Valid @RequestBody AdminLoginRequest request) {
-        return ApiResponse.ok(adminAuthService.login(request));
+    public ApiResponse<AdminLoginResponse> login(@Valid @RequestBody AdminLoginRequest request,
+                                                 HttpServletRequest servletRequest) {
+        return ApiResponse.ok(adminAuthService.login(request, ClientIpResolver.resolve(servletRequest)));
     }
 
     @PostMapping("/logout")

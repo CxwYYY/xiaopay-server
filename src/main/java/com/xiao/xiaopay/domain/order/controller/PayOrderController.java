@@ -43,13 +43,21 @@ public class PayOrderController {
 
     @GetMapping("/{orderNo}")
     public ApiResponse<OrderStatusResponse> get(@RequestHeader("X-XiaoPay-App") String appId,
+                                                @RequestHeader("X-XiaoPay-Timestamp") String timestamp,
+                                                @RequestHeader("X-XiaoPay-Nonce") String nonce,
+                                                @RequestHeader("X-XiaoPay-Signature") String signature,
                                                 @PathVariable String orderNo) {
+        signedBodyVerifier.verifyApp(appId, timestamp, nonce, signature, "");
         return ApiResponse.ok(payOrderService.getOrder(appId, orderNo));
     }
 
     @PostMapping("/{orderNo}/close")
     public ApiResponse<Void> close(@RequestHeader("X-XiaoPay-App") String appId,
+                                   @RequestHeader("X-XiaoPay-Timestamp") String timestamp,
+                                   @RequestHeader("X-XiaoPay-Nonce") String nonce,
+                                   @RequestHeader("X-XiaoPay-Signature") String signature,
                                    @PathVariable String orderNo) {
+        signedBodyVerifier.verifyApp(appId, timestamp, nonce, signature, "");
         payOrderService.close(appId, orderNo);
         return ApiResponse.ok();
     }

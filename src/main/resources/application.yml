@@ -29,16 +29,28 @@ mybatis-plus:
 
 sa-token:
   token-name: xiaopay-token
-  timeout: 2592000
-  active-timeout: -1
-  is-concurrent: true
-  is-share: true
-  token-style: uuid
+  timeout: ${XIAOPAY_ADMIN_TOKEN_TIMEOUT:86400}
+  active-timeout: ${XIAOPAY_ADMIN_ACTIVE_TIMEOUT:7200}
+  is-concurrent: false
+  is-share: false
+  token-style: random-64
   is-log: false
 
 xiaopay:
   security:
-    signature-window-seconds: 300
+    signature-window-seconds: ${XIAOPAY_SIGNATURE_WINDOW_SECONDS:300}
+    setup-token: ${XIAOPAY_SETUP_TOKEN:}
+    login-max-failures: ${XIAOPAY_LOGIN_MAX_FAILURES:5}
+    login-lock-minutes: ${XIAOPAY_LOGIN_LOCK_MINUTES:15}
+    allowed-origins:
+      - ${XIAOPAY_CONSOLE_ORIGIN:http://127.0.0.1:5176}
+      - http://localhost:5176
+      - http://127.0.0.1:5173
+      - http://localhost:5173
+      - http://127.0.0.1:5174
+      - http://localhost:5174
+      - http://127.0.0.1:5175
+      - http://localhost:5175
   paynum:
     default-length: 4
     fallback-length: 5

@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xiao.xiaopay.common.error.BusinessException;
 import com.xiao.xiaopay.common.id.IdGenerator;
+import com.xiao.xiaopay.common.security.SetupTokenVerifier;
 import com.xiao.xiaopay.common.time.TimeProvider;
 import com.xiao.xiaopay.domain.admin.dto.AdminInitRequest;
 import com.xiao.xiaopay.domain.admin.dto.AdminLoginRequest;
@@ -30,6 +31,8 @@ public class AdminAuthService {
     private final AdminPasswordService passwordService;
     private final IdGenerator idGenerator;
     private final TimeProvider timeProvider;
+    private final AdminLoginGuardService loginGuardService;
+    private final SetupTokenVerifier setupTokenVerifier;
 
     /**
      * 判断后台管理员是否已经初始化。
@@ -43,10 +46,11 @@ public class AdminAuthService {
      * 首次初始化管理员账号，只允许在空库时调用一次。
      */
     @Transactional
-    public AdminUserResponse init(AdminInitRequest request) {
+    public AdminUserResponse init(AdminInitRequest request, String setupToken, String clientIp) {
         if (initialized()) {
             throw new BusinessException(409, "admin already initialized");
         }
+        setupTokenVerifier.verify(setupToken, clientIp);
         LocalDateTime now = timeProvider.now();
         XpAdminUser user = new XpAdminUser();
         user.setId(idGenerator.nextId());
@@ -61,13 +65,22 @@ public class AdminAuthService {
     }
 
     /**
+     * 兼容测试和本地调用的初始化入口。
+     */
+    public AdminUserResponse init(AdminInitRequest request) {
+        return init(request, null, "127.0.0.1");
+    }
+
+    /**
      * 校验账号密码并写入 Sa-Token 登录态。
      */
     @Transactional
-    public AdminLoginResponse login(AdminLoginRequest request) {
+    public AdminLoginResponse login(AdminLoginRequest request, String clientIp) {
+        loginGuardService.checkAllowed(request.username(), clientIp);
         XpAdminUser user = adminUserMapper.selectOne(new LambdaQueryWrapper<XpAdminUser>()
                 .eq(XpAdminUser::getUsername, request.username()));
         if (user == null || !passwordService.matches(request.password(), user.getPasswordHash())) {
+            loginGuardService.recordFailure(request.username(), clientIp);
             throw new BusinessException(401, "username or password is invalid");
         }
         if (!Status.ENABLED.equals(user.getStatus())) {
@@ -79,7 +92,15 @@ public class AdminAuthService {
         adminUserMapper.updateById(user);
 
         StpUtil.login(user.getId());
+        loginGuardService.clear(request.username(), clientIp);
         return new AdminLoginResponse(StpUtil.getTokenName(), StpUtil.getTokenValue(), toResponse(user));
+    }
+
+    /**
+     * 兼容测试和本地调用的登录入口。
+     */
+    public AdminLoginResponse login(AdminLoginRequest request) {
+        return login(request, "unknown");
     }
 
     /**
@@ -92,6 +113,23 @@ public class AdminAuthService {
             throw new BusinessException(404, "admin user not found");
         }
         return toResponse(user);
+    }
+
+    /**
+     * 修改当前管理员密码。
+     */
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        XpAdminUser user = adminUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "admin user not found");
+        }
+        if (!passwordService.matches(oldPassword, user.getPasswordHash())) {
+            throw new BusinessException(400, "old password is invalid");
+        }
+        user.setPasswordHash(passwordService.hash(newPassword));
+        user.setUpdatedAt(timeProvider.now());
+        adminUserMapper.updateById(user);
     }
 
     /**
