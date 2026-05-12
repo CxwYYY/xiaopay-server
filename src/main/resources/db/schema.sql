@@ -44,6 +44,24 @@ CREATE TABLE IF NOT EXISTS xp_agent (
   KEY idx_xp_agent_channel (channel_id)
 ) COMMENT='Windows 微信到账采集器表，记录 agent 凭据、绑定通道和在线状态';
 
+CREATE TABLE IF NOT EXISTS xp_agent_bind_code (
+  id BIGINT PRIMARY KEY COMMENT 'Primary key',
+  bind_code VARCHAR(64) NOT NULL COMMENT 'One-time code used by xiaopay-agent to claim credentials',
+  agent_name VARCHAR(100) NOT NULL COMMENT 'Agent name created after successful claim',
+  channel_id BIGINT NOT NULL COMMENT 'Bound payment channel ID',
+  wechat_account VARCHAR(100) NULL COMMENT 'Optional WeChat account label',
+  host_name VARCHAR(100) NULL COMMENT 'Optional host name',
+  status VARCHAR(32) NOT NULL COMMENT 'PENDING, CLAIMED, EXPIRED or CANCELED',
+  claimed_agent_id VARCHAR(64) NULL COMMENT 'Agent ID created by successful claim',
+  expires_at DATETIME NOT NULL COMMENT 'Expiration time',
+  claimed_at DATETIME NULL COMMENT 'Claim time',
+  created_at DATETIME NOT NULL COMMENT 'Creation time',
+  updated_at DATETIME NOT NULL COMMENT 'Last update time',
+  UNIQUE KEY uk_xp_agent_bind_code (bind_code),
+  KEY idx_xp_agent_bind_code_status (status, expires_at),
+  KEY idx_xp_agent_bind_code_agent (claimed_agent_id)
+) COMMENT='One-time binding code table for xiaopay-agent onboarding';
+
 CREATE TABLE IF NOT EXISTS xp_pay_order (
   id BIGINT PRIMARY KEY COMMENT '主键 ID',
   app_id VARCHAR(64) NOT NULL COMMENT '接入应用编号',

@@ -47,6 +47,9 @@ public class SignedBodyVerifier {
         if (agent == null) {
             throw new BusinessException(401, "invalid agent");
         }
+        if ("DISABLED".equals(agent.getStatus()) || "DELETED".equals(agent.getStatus())) {
+            throw new BusinessException(403, "agent disabled");
+        }
         verifyTimestamp(timestamp);
         nonceService.checkAndRemember(agentId, nonce);
         if (!signatureService.verify(agent.getAgentSecret(), timestamp, nonce, body, signature)) {

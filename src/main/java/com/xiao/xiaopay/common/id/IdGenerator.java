@@ -60,6 +60,13 @@ public class IdGenerator {
     }
 
     /**
+     * Generate a short one-time code for binding xiaopay-agent.
+     */
+    public String bindCode() {
+        return random(8);
+    }
+
+    /**
      * 生成应用或 Agent 的 HMAC 签名密钥。
      */
     public String secret() {
