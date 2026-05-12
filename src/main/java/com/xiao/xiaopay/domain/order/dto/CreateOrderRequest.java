@@ -6,6 +6,11 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
+/**
+ * 商户创建支付订单请求。
+ *
+ * <p>businessType/businessPayload 会原样保存，并在支付回调中带回业务系统。</p>
+ */
 public record CreateOrderRequest(
         @NotBlank String appOrderNo,
         @NotNull @DecimalMin("0.01") BigDecimal amount,

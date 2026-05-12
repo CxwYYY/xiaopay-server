@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 管理后台微信到账消息人工处理服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminWechatMessageOperationService {
@@ -17,6 +20,9 @@ public class AdminWechatMessageOperationService {
     private final AuditLogService auditLogService;
     private final TimeProvider timeProvider;
 
+    /**
+     * 将未匹配或待人工处理的到账消息标记为重复。
+     */
     @Transactional
     public void markDuplicate(Long messageId, String reason) {
         XpWechatMessage message = messageMapper.selectById(messageId);

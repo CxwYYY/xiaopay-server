@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 订单过期处理服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderExpireService {
@@ -22,6 +25,9 @@ public class OrderExpireService {
     private final PayEventService payEventService;
     private final TimeProvider timeProvider;
 
+    /**
+     * 批量把已过期的待支付订单置为 EXPIRED，并生成过期事件。
+     */
     @Transactional
     public int expireDueOrders() {
         LocalDateTime now = timeProvider.now();

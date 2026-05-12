@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 商户侧支付订单接口。
+ *
+ * <p>创建订单接口必须使用 appSecret 对原始请求体签名。</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/pay/orders")

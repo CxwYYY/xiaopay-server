@@ -18,6 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台认证服务。
+ *
+ * <p>负责首次初始化管理员、登录、当前用户查询和退出登录。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminAuthService {
@@ -26,11 +31,17 @@ public class AdminAuthService {
     private final IdGenerator idGenerator;
     private final TimeProvider timeProvider;
 
+    /**
+     * 判断后台管理员是否已经初始化。
+     */
     public boolean initialized() {
         Long count = adminUserMapper.selectCount(null);
         return count != null && count > 0;
     }
 
+    /**
+     * 首次初始化管理员账号，只允许在空库时调用一次。
+     */
     @Transactional
     public AdminUserResponse init(AdminInitRequest request) {
         if (initialized()) {
@@ -49,6 +60,9 @@ public class AdminAuthService {
         return toResponse(user);
     }
 
+    /**
+     * 校验账号密码并写入 Sa-Token 登录态。
+     */
     @Transactional
     public AdminLoginResponse login(AdminLoginRequest request) {
         XpAdminUser user = adminUserMapper.selectOne(new LambdaQueryWrapper<XpAdminUser>()
@@ -68,6 +82,9 @@ public class AdminAuthService {
         return new AdminLoginResponse(StpUtil.getTokenName(), StpUtil.getTokenValue(), toResponse(user));
     }
 
+    /**
+     * 查询当前登录管理员资料。
+     */
     public AdminUserResponse current() {
         Long userId = StpUtil.getLoginIdAsLong();
         XpAdminUser user = adminUserMapper.selectById(userId);
@@ -77,6 +94,9 @@ public class AdminAuthService {
         return toResponse(user);
     }
 
+    /**
+     * 清理当前登录态。
+     */
     public void logout() {
         StpUtil.logout();
     }

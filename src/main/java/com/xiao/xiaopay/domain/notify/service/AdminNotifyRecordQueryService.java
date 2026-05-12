@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台回调记录查询服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminNotifyRecordQueryService {
@@ -17,6 +20,9 @@ public class AdminNotifyRecordQueryService {
 
     private final XpNotifyRecordMapper notifyRecordMapper;
 
+    /**
+     * 按应用、订单、回调事件和状态分页查询回调记录。
+     */
     public PageResult<XpNotifyRecord> list(long pageNo, long pageSize, String appId, String orderNo,
                                            String notifyEventId, String notifyStatus,
                                            LocalDateTime startAt, LocalDateTime endAt) {

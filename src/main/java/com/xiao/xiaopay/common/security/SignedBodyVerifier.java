@@ -10,6 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * 带签名请求体验签器。
+ *
+ * <p>先根据 appId/agentId 取密钥，再校验时间窗口和 HMAC 签名。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class SignedBodyVerifier {
@@ -20,6 +25,9 @@ public class SignedBodyVerifier {
     @Value("${xiaopay.security.signature-window-seconds:300}")
     private long signatureWindowSeconds;
 
+    /**
+     * 验证业务应用请求，并返回有效的应用实体。
+     */
     public XpApp verifyApp(String appId, String timestamp, String nonce, String signature, String body) {
         XpApp app = appMapper.selectOne(new LambdaQueryWrapper<XpApp>().eq(XpApp::getAppId, appId));
         if (app == null) {
@@ -32,6 +40,9 @@ public class SignedBodyVerifier {
         return app;
     }
 
+    /**
+     * 验证采集 Agent 请求，并返回有效的 Agent 实体。
+     */
     public XpAgent verifyAgent(String agentId, String timestamp, String nonce, String signature, String body) {
         XpAgent agent = agentMapper.selectOne(new LambdaQueryWrapper<XpAgent>().eq(XpAgent::getAgentId, agentId));
         if (agent == null) {
@@ -49,6 +60,7 @@ public class SignedBodyVerifier {
             long requestMs = Long.parseLong(timestamp);
             long nowMs = System.currentTimeMillis();
             long skewMs = Math.abs(nowMs - requestMs);
+            // 时间窗口用于防止旧请求被重放，nonce 留给调用方和日志追踪使用。
             if (skewMs > signatureWindowSeconds * 1000) {
                 throw new BusinessException(402, "timestamp expired");
             }

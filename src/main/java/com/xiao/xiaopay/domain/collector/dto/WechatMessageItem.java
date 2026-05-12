@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Agent 上报的单条微信到账消息。
+ */
 public record WechatMessageItem(
         @NotBlank String messageId,
         @NotNull @DecimalMin("0.01") BigDecimal amount,

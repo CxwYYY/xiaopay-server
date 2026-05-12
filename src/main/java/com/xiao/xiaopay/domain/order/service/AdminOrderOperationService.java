@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台订单人工处理服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminOrderOperationService {
@@ -23,6 +26,9 @@ public class AdminOrderOperationService {
     private final AuditLogService auditLogService;
     private final TimeProvider timeProvider;
 
+    /**
+     * 人工关闭待支付订单。
+     */
     @Transactional
     public void close(String orderNo, String reason) {
         XpPayOrder order = getByOrderNo(orderNo);
@@ -35,6 +41,9 @@ public class AdminOrderOperationService {
         auditLogService.record("CLOSE_ORDER", "ORDER", orderNo, null, reason);
     }
 
+    /**
+     * 将未支付成功的订单标记为异常。
+     */
     @Transactional
     public void markAbnormal(String orderNo, String reason) {
         XpPayOrder order = getByOrderNo(orderNo);
@@ -47,6 +56,9 @@ public class AdminOrderOperationService {
         auditLogService.record("MARK_ORDER_ABNORMAL", "ORDER", orderNo, null, reason);
     }
 
+    /**
+     * 延长待支付订单过期时间。
+     */
     @Transactional
     public void extendExpire(String orderNo, int minutes, String reason) {
         XpPayOrder order = getByOrderNo(orderNo);
@@ -63,6 +75,9 @@ public class AdminOrderOperationService {
         auditLogService.record("EXTEND_ORDER_EXPIRE", "ORDER", orderNo, null, reason);
     }
 
+    /**
+     * 为已支付订单重新创建支付成功事件，驱动回调重试。
+     */
     @Transactional
     public void retryNotify(String orderNo, String reason) {
         XpPayOrder order = getByOrderNo(orderNo);

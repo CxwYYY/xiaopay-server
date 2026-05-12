@@ -1,5 +1,8 @@
 package com.xiao.xiaopay.domain.channel.dto;
 
+/**
+ * 支付通道响应。
+ */
 public record ChannelResponse(
         Long id,
         String channelCode,

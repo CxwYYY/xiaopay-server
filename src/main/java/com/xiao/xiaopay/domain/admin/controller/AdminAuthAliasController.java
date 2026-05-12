@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 管理后台认证兼容入口。
+ *
+ * <p>保留 {@code /api/admin/login} 和 {@code /api/admin/logout}，便于前端使用短路径。</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")

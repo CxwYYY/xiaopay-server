@@ -6,6 +6,11 @@ import java.security.SecureRandom;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
+/**
+ * 付款备注识别码生成服务。
+ *
+ * <p>默认生成四位数字，冲突过多时自动升级为五位数字。</p>
+ */
 @Service
 public class PayNumService {
     private static final int MAX_ATTEMPTS = 20;
@@ -20,6 +25,9 @@ public class PayNumService {
         this.randomFourDigit = randomFourDigit;
     }
 
+    /**
+     * 生成在调用方业务窗口内不存在的 payNum。
+     */
     public String generate(int length, Predicate<String> exists) {
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
             String candidate = candidate(length);

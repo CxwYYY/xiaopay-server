@@ -9,6 +9,11 @@ import com.xiao.xiaopay.domain.order.entity.XpPayOrder;
 
 import java.util.List;
 
+/**
+ * 管理后台订单详情响应。
+ *
+ * <p>聚合订单、到账消息、匹配记录、事件、回调记录和审计日志。</p>
+ */
 public record AdminOrderDetailResponse(
         XpPayOrder order,
         List<XpWechatMessage> wechatMessages,

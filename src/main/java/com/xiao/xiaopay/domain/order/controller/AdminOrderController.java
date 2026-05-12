@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台订单查询和人工处理接口。
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/orders")

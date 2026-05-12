@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Agent 心跳接口。
+ *
+ * <p>调用方必须使用 agentSecret 对原始请求体签名。</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/collector")

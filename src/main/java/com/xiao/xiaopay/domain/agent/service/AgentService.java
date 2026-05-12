@@ -18,6 +18,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 采集 Agent 管理服务。
+ *
+ * <p>负责 Agent 凭据、绑定通道、在线状态和心跳状态维护。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AgentService {
@@ -26,6 +31,9 @@ public class AgentService {
     private final TimeProvider timeProvider;
     private final AuditLogService auditLogService;
 
+    /**
+     * 创建采集 Agent，并返回首次可见的 agentSecret。
+     */
     public AgentResponse create(CreateAgentRequest request) {
         LocalDateTime now = timeProvider.now();
         XpAgent agent = new XpAgent();
@@ -43,6 +51,9 @@ public class AgentService {
         return toResponse(agent, true);
     }
 
+    /**
+     * 按 agentId 查询 Agent，不存在时抛出业务异常。
+     */
     public XpAgent getByAgentId(String agentId) {
         XpAgent agent = agentMapper.selectOne(new LambdaQueryWrapper<XpAgent>().eq(XpAgent::getAgentId, agentId));
         if (agent == null) {
@@ -51,6 +62,9 @@ public class AgentService {
         return agent;
     }
 
+    /**
+     * 更新 Agent 心跳、主机名和健康状态。
+     */
     public void heartbeat(String agentId, String hostName, String lastError) {
         XpAgent agent = getByAgentId(agentId);
         agent.setHostName(hostName);
@@ -61,14 +75,23 @@ public class AgentService {
         agentMapper.updateById(agent);
     }
 
+    /**
+     * 查询 Agent 列表，默认隐藏 agentSecret。
+     */
     public List<AgentResponse> list() {
         return agentMapper.selectList(null).stream().map(agent -> toResponse(agent, false)).toList();
     }
 
+    /**
+     * 查询 Agent 详情。
+     */
     public AgentResponse detail(String agentId) {
         return toResponse(getByAgentId(agentId), false);
     }
 
+    /**
+     * 更新 Agent 名称、绑定通道和运行主机信息。
+     */
     public AgentResponse update(String agentId, UpdateAgentRequest request) {
         XpAgent agent = getByAgentId(agentId);
         String before = JSONUtil.toJsonStr(agent);
@@ -86,6 +109,9 @@ public class AgentService {
         return toResponse(agent, false);
     }
 
+    /**
+     * 设置 Agent 状态，后台删除动作也通过停用实现。
+     */
     public AgentResponse setStatus(String agentId, String status) {
         XpAgent agent = getByAgentId(agentId);
         String before = JSONUtil.toJsonStr(agent);
@@ -96,6 +122,9 @@ public class AgentService {
         return toResponse(agent, false);
     }
 
+    /**
+     * 重置 Agent 签名密钥，并只在本次响应中返回新密钥。
+     */
     public AgentResponse resetSecret(String agentId) {
         XpAgent agent = getByAgentId(agentId);
         String before = JSONUtil.toJsonStr(agent);
@@ -106,6 +135,9 @@ public class AgentService {
         return toResponse(agent, true);
     }
 
+    /**
+     * 转换为接口响应对象，可按场景控制是否包含 agentSecret。
+     */
     public AgentResponse toResponse(XpAgent agent, boolean includeSecret) {
         return new AgentResponse(agent.getAgentId(), includeSecret ? agent.getAgentSecret() : null,
                 agent.getAgentName(), agent.getChannelId(), agent.getWechatAccount(),

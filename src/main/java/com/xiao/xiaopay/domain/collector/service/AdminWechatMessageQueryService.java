@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台微信到账消息查询服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminWechatMessageQueryService {
@@ -17,6 +20,9 @@ public class AdminWechatMessageQueryService {
 
     private final XpWechatMessageMapper messageMapper;
 
+    /**
+     * 按 Agent、通道、备注码、匹配状态和到账时间分页查询消息。
+     */
     public PageResult<XpWechatMessage> list(long pageNo, long pageSize, String agentId, Long channelId,
                                             String messageId, String payNum, String matchStatus,
                                             String matchedOrderNo, LocalDateTime startAt, LocalDateTime endAt) {

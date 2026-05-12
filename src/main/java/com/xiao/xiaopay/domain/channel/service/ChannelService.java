@@ -17,6 +17,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 支付通道管理服务。
+ *
+ * <p>第一版主要管理微信个人收款码通道，并保留通道类型和配置字段用于后续扩展。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ChannelService {
@@ -24,6 +29,9 @@ public class ChannelService {
     private final TimeProvider timeProvider;
     private final AuditLogService auditLogService;
 
+    /**
+     * 创建支付通道。
+     */
     public ChannelResponse create(CreateChannelRequest request) {
         LocalDateTime now = timeProvider.now();
         XpChannel channel = new XpChannel();
@@ -43,6 +51,9 @@ public class ChannelService {
         return toResponse(channel);
     }
 
+    /**
+     * 选择一个启用中的微信通道用于创建支付订单。
+     */
     public XpChannel selectEnabledWechatChannel() {
         XpChannel channel = channelMapper.selectOne(new LambdaQueryWrapper<XpChannel>()
                 .eq(XpChannel::getChannelType, "wechat")
@@ -55,6 +66,9 @@ public class ChannelService {
         return channel;
     }
 
+    /**
+     * 按主键查询通道，不存在时抛出业务异常。
+     */
     public XpChannel getById(Long channelId) {
         XpChannel channel = channelMapper.selectById(channelId);
         if (channel == null) {
@@ -63,14 +77,23 @@ public class ChannelService {
         return channel;
     }
 
+    /**
+     * 查询支付通道列表。
+     */
     public List<ChannelResponse> list() {
         return channelMapper.selectList(null).stream().map(this::toResponse).toList();
     }
 
+    /**
+     * 查询支付通道详情。
+     */
     public ChannelResponse detail(Long channelId) {
         return toResponse(getById(channelId));
     }
 
+    /**
+     * 更新支付通道基础资料、二维码和扩展配置。
+     */
     public ChannelResponse update(Long channelId, UpdateChannelRequest request) {
         XpChannel channel = getById(channelId);
         String before = JSONUtil.toJsonStr(channel);
@@ -95,6 +118,9 @@ public class ChannelService {
         return toResponse(channel);
     }
 
+    /**
+     * 启用、停用或软删除支付通道。
+     */
     public ChannelResponse setStatus(Long channelId, String status) {
         XpChannel channel = getById(channelId);
         String before = JSONUtil.toJsonStr(channel);
@@ -105,6 +131,9 @@ public class ChannelService {
         return toResponse(channel);
     }
 
+    /**
+     * 转换为接口响应对象。
+     */
     public ChannelResponse toResponse(XpChannel channel) {
         return new ChannelResponse(channel.getId(), channel.getChannelCode(), channel.getChannelName(),
                 channel.getChannelType(), channel.getCollectorType(), channel.getAgentId(),

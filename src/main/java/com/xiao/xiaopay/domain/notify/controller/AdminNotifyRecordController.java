@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台回调记录查询接口。
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/notify-records")

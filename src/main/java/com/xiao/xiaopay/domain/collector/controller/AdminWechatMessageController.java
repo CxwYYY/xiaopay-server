@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+/**
+ * 管理后台微信到账消息查询和人工处理接口。
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/wechat-messages")

@@ -23,6 +23,11 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+/**
+ * 商户侧支付订单服务。
+ *
+ * <p>负责签名应用下单、订单查询、商户关闭订单和 payNum 唯一性检查。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class PayOrderService {
@@ -33,6 +38,11 @@ public class PayOrderService {
     private final TimeProvider timeProvider;
     private final StringRedisTemplate redisTemplate;
 
+    /**
+     * 创建支付订单。
+     *
+     * <p>同一 {@code appId + appOrderNo} 重复请求会返回已有订单，避免业务系统重复下单。</p>
+     */
     @Transactional
     public CreateOrderResponse create(String appId, CreateOrderRequest request) {
         BigDecimal amount = MoneyUtils.normalize(request.amount());
@@ -52,6 +62,7 @@ public class PayOrderService {
         try {
             LocalDateTime now = timeProvider.now();
             LocalDateTime expireAt = now.plusSeconds(request.expireSeconds() == null ? 900 : request.expireSeconds());
+            // 同一通道、同一金额、未过期待支付订单内，payNum 必须唯一，才能靠付款备注精确匹配。
             String payNum = payNumService.generate(4, candidate -> existsPendingPayNum(channel.getId(), amount, candidate, now));
 
             XpPayOrder order = new XpPayOrder();
@@ -83,6 +94,9 @@ public class PayOrderService {
         }
     }
 
+    /**
+     * 查询商户自己应用下的订单状态。
+     */
     public OrderStatusResponse getOrder(String appId, String orderNo) {
         XpPayOrder order = orderMapper.selectOne(new LambdaQueryWrapper<XpPayOrder>()
                 .eq(XpPayOrder::getAppId, appId)
@@ -93,6 +107,9 @@ public class PayOrderService {
         return toStatusResponse(order);
     }
 
+    /**
+     * 商户主动关闭自己应用下的待支付订单。
+     */
     public void close(String appId, String orderNo) {
         XpPayOrder order = orderMapper.selectOne(new LambdaQueryWrapper<XpPayOrder>()
                 .eq(XpPayOrder::getAppId, appId)
@@ -108,6 +125,9 @@ public class PayOrderService {
         orderMapper.updateById(order);
     }
 
+    /**
+     * 按 XiaoPay 订单号查询订单。
+     */
     public XpPayOrder getByOrderNo(String orderNo) {
         XpPayOrder order = orderMapper.selectOne(new LambdaQueryWrapper<XpPayOrder>().eq(XpPayOrder::getOrderNo, orderNo));
         if (order == null) {
@@ -116,6 +136,9 @@ public class PayOrderService {
         return order;
     }
 
+    /**
+     * 检查未过期待支付订单中是否已存在相同 payNum。
+     */
     public boolean existsPendingPayNum(Long channelId, BigDecimal amount, String payNum, LocalDateTime now) {
         Long count = orderMapper.selectCount(new LambdaQueryWrapper<XpPayOrder>()
                 .eq(XpPayOrder::getChannelId, channelId)

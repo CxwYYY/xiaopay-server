@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 管理后台支付通道管理接口。
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/channels")

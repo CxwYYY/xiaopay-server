@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 管理后台 Agent 管理接口。
+ *
+ * <p>Agent 用于接收本地微信到账消息并推送到 XiaoPay。</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/agents")

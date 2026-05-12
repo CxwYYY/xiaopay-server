@@ -9,12 +9,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+/**
+ * 后台操作审计日志服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class AuditLogService {
     private final XpAuditLogMapper auditLogMapper;
     private final TimeProvider timeProvider;
 
+    /**
+     * 记录一次后台操作，before/after 会被规范化为合法 JSON。
+     */
     public void record(String action, String targetType, String targetId, String beforeJson, String afterJson) {
         XpAuditLog log = new XpAuditLog();
         log.setAction(action);

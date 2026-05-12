@@ -17,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * 微信到账消息接收服务。
+ *
+ * <p>负责 Agent 推送消息的入库去重，并在新消息入库后触发订单匹配。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class WechatCollectorService {
@@ -24,6 +29,9 @@ public class WechatCollectorService {
     private final OrderMatcherService matcherService;
     private final TimeProvider timeProvider;
 
+    /**
+     * 接收一批微信到账消息，返回本批接收、入库和重复数量。
+     */
     @Transactional
     public WechatMessagePushResponse receive(XpAgent agent, WechatMessagePushRequest request) {
         int inserted = 0;
@@ -35,6 +43,7 @@ public class WechatCollectorService {
                 inserted++;
                 matcherService.match(message.getId());
             } catch (DuplicateKeyException ex) {
+                // 唯一键保证 agentId + messageId 幂等，重复推送只计数不报错。
                 duplicates++;
             }
         }

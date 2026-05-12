@@ -25,6 +25,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 支付结果通知服务。
+ *
+ * <p>消费支付事件，向业务系统发送签名回调，并记录每次回调请求和响应。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class NotifyService {
@@ -36,6 +41,9 @@ public class NotifyService {
     private final SignatureService signatureService;
     private final TimeProvider timeProvider;
 
+    /**
+     * 批量处理当前可执行的待通知事件。
+     */
     public int processPendingEvents() {
         List<XpPayEvent> events = payEventService.pendingEvents(timeProvider.now(), 50);
         int processed = 0;
@@ -46,8 +54,12 @@ public class NotifyService {
         return processed;
     }
 
+    /**
+     * 处理单个支付事件，成功则结束事件，失败则安排下次重试。
+     */
     @Transactional
     public void process(XpPayEvent event) {
+        // 先标记 PROCESSING 并增加尝试次数，避免同一轮调度重复处理。
         event.setEventStatus(PayEventStatus.PROCESSING.name());
         event.setAttemptCount(event.getAttemptCount() + 1);
         payEventService.update(event);
@@ -64,6 +76,7 @@ public class NotifyService {
                 ? app.getNotifyUrl()
                 : order.getNotifyUrl();
         if (notifyUrl == null || notifyUrl.isBlank()) {
+            // 未配置订单级和应用默认回调时，订单视为无需通知。
             order.setNotifyStatus(NotifyStatus.IGNORED.name());
             order.setUpdatedAt(timeProvider.now());
             orderMapper.updateById(order);
@@ -79,6 +92,7 @@ public class NotifyService {
         String body = JSONUtil.toJsonStr(payload);
         String timestamp = String.valueOf(System.currentTimeMillis());
         String nonce = UUID.randomUUID().toString().replace("-", "");
+        // 业务系统用同一 canonical 串校验 XiaoPay 发出的回调真实性。
         String signature = signatureService.sign(app.getAppSecret(), timestamp, nonce, body);
 
         XpNotifyRecord record = newNotifyRecord(event, order, notifyUrl, notifyEventId, body);
@@ -133,6 +147,7 @@ public class NotifyService {
 
     private void retry(XpPayEvent event, XpPayOrder order, String error) {
         event.setEventStatus(PayEventStatus.RETRYING.name());
+        // 简单线性退避：第 N 次失败后最多延迟 10 分钟再次尝试。
         event.setNextRetryAt(timeProvider.now().plusMinutes(Math.min(event.getAttemptCount(), 10)));
         event.setLastError(error);
         if (order != null) {

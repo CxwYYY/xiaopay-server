@@ -3,6 +3,9 @@ package com.xiao.xiaopay.domain.dashboard.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * 管理后台仪表盘汇总指标。
+ */
 public record DashboardSummaryResponse(
         long totalOrders,
         long pendingOrders,

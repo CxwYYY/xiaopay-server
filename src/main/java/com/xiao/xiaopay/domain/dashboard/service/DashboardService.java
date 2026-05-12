@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 管理后台仪表盘统计服务。
+ */
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
@@ -33,6 +36,9 @@ public class DashboardService {
     private final XpNotifyRecordMapper notifyRecordMapper;
     private final XpAgentMapper agentMapper;
 
+    /**
+     * 汇总订单、到账、回调、Agent 和应用收入排行指标。
+     */
     public DashboardSummaryResponse summary() {
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
         LocalDateTime tomorrowStart = todayStart.plusDays(1);

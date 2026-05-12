@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Agent 微信到账消息上报接口。
+ *
+ * <p>接收 xiaopay-agent 推送的微信到账消息，并触发订单自动匹配。</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/collector")

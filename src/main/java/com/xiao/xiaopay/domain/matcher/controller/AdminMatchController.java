@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 管理后台到账匹配人工操作接口。
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/matches")

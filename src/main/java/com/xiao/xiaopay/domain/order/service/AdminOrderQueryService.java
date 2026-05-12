@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+/**
+ * 管理后台订单查询服务。
+ *
+ * <p>负责订单列表筛选和订单详情聚合，详情会带出到账消息、匹配记录、事件、回调和审计日志。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminOrderQueryService {
@@ -37,6 +42,9 @@ public class AdminOrderQueryService {
     private final XpNotifyRecordMapper notifyRecordMapper;
     private final XpAuditLogMapper auditLogMapper;
 
+    /**
+     * 按后台筛选条件分页查询订单。
+     */
     public PageResult<XpPayOrder> list(long pageNo, long pageSize, String appId, String orderNo,
                                        String appOrderNo, String orderStatus, String notifyStatus,
                                        String businessType, LocalDateTime startAt, LocalDateTime endAt) {
@@ -54,6 +62,9 @@ public class AdminOrderQueryService {
         return new PageResult<>(page.getTotal(), page.getCurrent(), page.getSize(), page.getRecords());
     }
 
+    /**
+     * 查询订单详情及其关联链路记录。
+     */
     public AdminOrderDetailResponse detail(String orderNo) {
         XpPayOrder order = orderMapper.selectOne(new LambdaQueryWrapper<XpPayOrder>()
                 .eq(XpPayOrder::getOrderNo, orderNo));
@@ -78,6 +89,7 @@ public class AdminOrderQueryService {
     }
 
     private List<XpWechatMessage> selectOrderMessages(String orderNo, List<XpOrderMatch> matches) {
+        // 先按消息当前绑定订单查询，再补齐历史匹配记录里的消息，避免人工解绑后详情链路丢失。
         LinkedHashMap<Long, XpWechatMessage> messageMap = new LinkedHashMap<>();
         List<XpWechatMessage> matchedByOrderNo = messageMapper.selectList(new LambdaQueryWrapper<XpWechatMessage>()
                 .eq(XpWechatMessage::getMatchedOrderNo, orderNo)
