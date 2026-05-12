@@ -1,0 +1,47 @@
+server:
+  port: 18080
+
+spring:
+  application:
+    name: xiaopay-server
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${XIAOPAY_DB_URL:jdbc:mysql://127.0.0.1:3306/xiaopay?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${XIAOPAY_DB_USERNAME:root}
+    password: ${XIAOPAY_DB_PASSWORD:}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+  data:
+    redis:
+      host: ${XIAOPAY_REDIS_HOST:127.0.0.1}
+      port: ${XIAOPAY_REDIS_PORT:6379}
+      password: ${XIAOPAY_REDIS_PASSWORD:}
+      database: ${XIAOPAY_REDIS_DATABASE:0}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: assign_id
+
+sa-token:
+  token-name: xiaopay-token
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+xiaopay:
+  security:
+    signature-window-seconds: 300
+  paynum:
+    default-length: 4
+    fallback-length: 5
+    max-attempts: 20
+  notify:
+    fixed-delay-ms: 10000

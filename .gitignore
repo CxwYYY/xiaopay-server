@@ -1,0 +1,30 @@
+# Maven build output
+target/
+
+# IDE metadata
+.idea/
+*.iml
+.vscode/
+
+# Logs and runtime dumps
+*.log
+logs/
+*.pid
+*.hprof
+hs_err_pid*
+replay_pid*
+
+# Local environment and secrets
+.env
+.env.*
+*.local
+*.local.*
+application-local.yml
+application-local.yaml
+application-*.local.yml
+application-*.local.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
